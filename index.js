@@ -1,5 +1,4 @@
-import puppeteer from "puppeteer-core";
-import chrome from "chrome-aws-lambda";
+import puppeteer from "puppeteer";
 
 
 const sectionNames = ["NEWS", "ENTERTAINMENT", "TECHNOLOGY", "TRAVEL", "FOOD", "SPORTS"];
@@ -7,10 +6,10 @@ let globalid = 1;
 
 export async function scrapeFlipboard() {
   const browser = await puppeteer.launch({
-    args: chrome.args,
-    executablePath: await chrome.executablePath || "/usr/bin/google-chrome",
-    headless: chrome.headless,
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
   });
+  
   
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
