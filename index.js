@@ -1,12 +1,15 @@
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chrome from "chrome-aws-lambda";
+
 
 const sectionNames = ["NEWS", "ENTERTAINMENT", "TECHNOLOGY", "TRAVEL", "FOOD", "SPORTS"];
 let globalid = 1;
 
 export async function scrapeFlipboard() {
   const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    args: chrome.args,
+    executablePath: await chrome.executablePath || "/usr/bin/google-chrome",
+    headless: chrome.headless,
   });
   
   const page = await browser.newPage();
