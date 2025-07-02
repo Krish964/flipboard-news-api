@@ -4,11 +4,12 @@ import puppeteer from "puppeteer";
 
 const sectionNames = ["NEWS", "ENTERTAINMENT", "TECHNOLOGY", "TRAVEL", "FOOD", "SPORTS"];
 let globalid = 1;
+const executablePath = await puppeteer.executablePath(); // ✅ Await it separately
 
 export async function scrapeFlipboard() {
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: await puppeteer.executablePath(), // yahi fix hai 🔧
+    executablePath, // ✅ Use the variable
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
   
