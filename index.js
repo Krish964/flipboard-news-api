@@ -8,7 +8,7 @@ let globalid = 1;
 export async function scrapeFlipboard() {
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: await puppeteer.executablePath(), // puppeteer ke browser ka path
+    executablePath: await puppeteer.executablePath(), // yahi fix hai 🔧
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
   
