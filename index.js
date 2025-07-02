@@ -7,7 +7,8 @@ let globalid = 1;
 
 export async function scrapeFlipboard() {
   const browser = await puppeteer.launch({
-    headless: false, // optional: false rakh sakta hai testing ke liye
+    headless: true,
+    executablePath: await puppeteer.executablePath(), // puppeteer ke browser ka path
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
   
