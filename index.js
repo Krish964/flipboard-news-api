@@ -1,31 +1,29 @@
-
 import puppeteer from "puppeteer";
-
 
 const sectionNames = ["NEWS", "ENTERTAINMENT", "TECHNOLOGY", "TRAVEL", "FOOD", "SPORTS"];
 let globalid = 1;
 
 export async function scrapeFlipboard() {
+  console.log("🚀 Starting Flipboard Scraper...");
+
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath: puppeteer.executablePath() // ✅ recommended
   });
-  
-  
-  
+
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
-
-  // ✅ Global timeout set
   await page.setDefaultNavigationTimeout(60000);
 
+  console.log("🌐 Navigating to Flipboard homepage...");
   await page.goto("https://flipboard.com", { waitUntil: "networkidle2", timeout: 60000 });
   await new Promise(res => setTimeout(res, 2000));
 
   const allFinalPosts = [];
 
   for (const section of sectionNames) {
-    console.log(`\n🔘 Navigating to: ${section}`);
+    console.log(`\n🔘 Navigating to section: ${section}`);
 
     await page.evaluate((section) => {
       const tabs = Array.from(document.querySelectorAll("nav a, nav li"));
@@ -33,12 +31,16 @@ export async function scrapeFlipboard() {
       target?.click();
     }, section);
 
-    await page.waitForSelector("article", { timeout: 15000 }).catch(() => {
+    try {
+      await page.waitForSelector("article", { timeout: 15000 });
+      console.log(`📃 Articles found in "${section}", starting scroll...`);
+    } catch {
       console.warn(`⚠️ Skipping section "${section}" — No articles found.`);
-      return;
-    });
+      continue;
+    }
 
     await autoScroll(page, 20, 1500);
+    console.log(`🔽 Scroll done for "${section}". Extracting posts...`);
 
     const rawPosts = await page.evaluate(() => {
       const articles = document.querySelectorAll("article");
@@ -65,12 +67,13 @@ export async function scrapeFlipboard() {
       return data;
     });
 
-    const posts = rawPosts.map(post => ({ id: globalid++, ...post }));
-    console.log(`📦 ${posts.length} posts found in "${section}"`);
+    console.log(`📦 ${rawPosts.length} raw posts found in "${section}"`);
 
+    const posts = rawPosts.map(post => ({ id: globalid++, ...post }));
     const finalPosts = [];
 
     for (const post of posts) {
+      console.log(`🔍 Visiting post: ${post.title} (${post.link})`);
       const newPage = await browser.newPage();
       await newPage.setDefaultNavigationTimeout(60000);
 
@@ -104,9 +107,11 @@ export async function scrapeFlipboard() {
         });
 
         Object.assign(post, description);
+        console.log(`✅ Enriched post: "${post.heading || post.title}"`);
       } catch (err) {
         post.error = "Failed to fetch description.";
-        console.warn("❌ Failed to load post:", post.link);
+        console.warn("❌ Error loading post:", post.link);
+        console.warn(err.message);
       }
 
       try {
@@ -119,18 +124,18 @@ export async function scrapeFlipboard() {
     }
 
     allFinalPosts.push(...finalPosts);
-    console.log(`✅ Final ${finalPosts.length} enriched posts from "${section}"`);
+    console.log(`✅ Finalized ${finalPosts.length} enriched posts from "${section}"`);
   }
 
   await browser.close();
+  console.log(`🏁 Scraping complete. Total posts: ${allFinalPosts.length}`);
   return allFinalPosts;
 }
 
-// 🧠 Auto scroll function
+// Auto scroll logic
 async function autoScroll(page, maxAttempts = 10, delay = 1000) {
   await page.evaluate(async (maxAttempts, delay) => {
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
     let lastHeight = 0;
     let sameCount = 0;
 
@@ -150,112 +155,3 @@ async function autoScroll(page, maxAttempts = 10, delay = 1000) {
     }
   }, maxAttempts, delay);
 }
-
-
-// await autoScroll(page, 20, 1500);
-
-
-
-
-
-
-// import puppeteer from "puppeteer";
-
-// (async () => {
-//   const browser = await puppeteer.launch({ headless: false });
-//   const page = await browser.newPage();
-
-//   await page.setUserAgent(
-//     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121 Safari/537.36"
-//   );
-
-//   await page.goto("https://flipboard.com/", { waitUntil: "networkidle2" });
-//   await page.setViewport({ width: 1366, height: 768 });
-//   await new Promise(res => setTimeout(res, 2000));
-
-//   const posts = await page.evaluate(() => {
-//     const articles = document.querySelectorAll("article");
-//     const data = [];
-
-//     articles.forEach(article => {
-//       const image = article.querySelector("img")?.src || "";
-//       const timing = article.querySelector("time")?.innerText || "";
-//       const title = article.querySelector("h3")?.innerText || "";
-//       const address = article.querySelector("address")?.innerText || "";
-//       const link = article.querySelector("h3 a")?.href || "";
-
-//       const stats = Array.from(article.querySelectorAll(".css-ss7fa4")).map(el =>
-//         el.innerText.trim()
-//       );
-
-//       const likes = Number(stats[0]) || 0;
-//       const comments = Number(stats[1]) || 0;
-//       const flips = Number(stats[2]) || 0;
-
-//       data.push({
-//         image,
-//         timing,
-//         title,
-//         address,
-//         likes,
-//         comments,
-//         flips,
-//         link
-//       });
-//     });
-
-//     return data;
-//   });
-
-//   const finalPosts = [];
-
-//   for (const post of posts) {
-//     const newPage = await browser.newPage();
-
-//     try {
-//       await newPage.setUserAgent(
-//         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121 Safari/537.36"
-//       );
-
-//       await newPage.goto(post.link, { waitUntil: "domcontentloaded" });
-//       await new Promise(res => setTimeout(res, 2000));
-
-//       const description = await newPage.evaluate(() => {
-//         const heading = document.querySelector(".item-details__title")?.innerText || "";
-//         const secondPageImage = document.querySelector("img")?.src || "";
-//         const paragraphs = document.querySelector(".post__excerpt")?.innerText || "";
-//         const author = document.querySelector("address a")?.innerText || "";
-//         const readMoreLink = document.querySelector(".read-more-in-source a")?.href || "";
-
-//         const hashTags = Array.from(document.querySelectorAll(".topic-tags li"))
-//           .map(li => li.innerText.trim())
-//           .filter(Boolean);
-
-//         return {
-//           heading,
-//           secondPageImage,
-//           paragraphs,
-//           author,
-//           readMoreLink,
-//           hashTags
-//         };
-//       });
-
-//       post.heading = description.heading;
-//       post.secondPageImage = description.secondPageImage;
-//       post.paragraphs = description.paragraphs;
-//       post.author = description.author;
-//       post.readMoreLink = description.readMoreLink;
-//       post.hashTags = description.hashTags;
-//     } catch (err) {
-//       post.error = "Failed to fetch description.";
-//     }
-
-//     await newPage.close();
-//     finalPosts.push(post);
-//   }
-
-//   console.log(posts)
-//   console.log(finalPosts);
-//   await browser.close();
-// })();
