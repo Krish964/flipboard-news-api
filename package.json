@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "npm install && npx puppeteer browsers install chrome",
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "puppeteer install"
   },
   "keywords": [],
   "author": "",

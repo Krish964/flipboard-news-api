@@ -8,9 +8,9 @@ let globalid = 1;
 export async function scrapeFlipboard() {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    executablePath: '/opt/render/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome' // or whatever version is installed
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
   });
+  
   
   
   const page = await browser.newPage();
