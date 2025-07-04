@@ -1,4 +1,6 @@
 import puppeteer from "puppeteer";
+console.log("Chromium executable path:", puppeteer.executablePath());
+
 
 const sectionNames = ["NEWS", "ENTERTAINMENT", "TECHNOLOGY", "TRAVEL", "FOOD", "SPORTS"];
 let globalid = 1;
@@ -9,9 +11,10 @@ export async function scrapeFlipboard() {
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    executablePath: puppeteer.executablePath() // ✅ recommended
+    executablePath: "/usr/bin/chromium"  // 👈 Linux system chromium path
   });
-
+  console.log("✅ Using Chromium at:", "/usr/bin/chromium");
+  
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
   await page.setDefaultNavigationTimeout(60000);
