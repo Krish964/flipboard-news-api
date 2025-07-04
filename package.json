@@ -1,19 +1,18 @@
 {
-  "name": "scrapping",
+  "name": "flipboard-scraper",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "build": "apt-get update && apt-get install -y chromium"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Flipboard scraping API using Puppeteer",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "puppeteer": "^21.0.0"
+    "express": "^4.18.2",
+    "puppeteer-core": "^21.3.8"
   }
 }
