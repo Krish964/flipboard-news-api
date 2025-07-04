@@ -11,7 +11,7 @@ export async function scrapeFlipboard() {
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    executablePath: "/usr/bin/chromium"  // 👈 Linux system chromium path
+    executablePath: puppeteer.executablePath(), // 👈 Linux system chromium path
   });
   console.log("✅ Using Chromium at:", "/usr/bin/chromium");
   
